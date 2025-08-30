@@ -1,15 +1,22 @@
-from typing import Literal
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
 import requests as rq
+from steamclient import STEAM_PATH
 
 BASE_URL:str = "https://steamcdn-a.akamaihd.net/"
-IMG_TYPES = ["library_600x900_2x.jpg","library_hero.jpg","logo.png"]
+
+# each image type has a suffix that will be added to the saved file's name
+IMG_TYPES = {
+    "library_600x900_2x.jpg":"p.jpg",
+    "library_hero.jpg":"_hero.jpg",
+    "logo.png":"_logo.png",
+    "capsule_616x353.jpg":".jpg"
+    }
 
 game_id:int 
 
-def save_images_from_id(game_id:int):
+def save_images_from_id(user_id:int,game_id:int,non_steam_id:int):
     # get the image via web request to steam's CDN
     for img_type in IMG_TYPES:
         request = rq.get(f"{BASE_URL}/steam/apps/{game_id}/{img_type}")
@@ -20,9 +27,11 @@ def save_images_from_id(game_id:int):
         # open image in memory
         img = Image.open(BytesIO(request.content))
 
-        # create image path
-        img_path = Path("img") / str(game_id)
+        # create image path in steam folder
+        img_path = Path(f"{STEAM_PATH}\\userdata\\{user_id}\\config\\grid")
         img_path.mkdir(parents=True, exist_ok=True)
 
-        img.save(img_path / img_type)
+        # save the image as the non-steam ID + its type suffix
+        # eg: library_hero.jpg of the bending of isaac becomes 250900_hero.jpg
+        img.save(img_path / (str(non_steam_id)+IMG_TYPES[img_type]))
         print(f"saved in {img_path}")
