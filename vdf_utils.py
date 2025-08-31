@@ -95,3 +95,77 @@ def parse_vdf(file_path):
         return result
     
     return parse_section()
+
+
+
+def write_binary_vdf(data, file_path):
+    """
+    Encode a dictionary to binary VDF format and write to file.
+    
+    Args:
+        data (dict): Dictionary to encode
+        file_path (str): Path where to save the binary VDF file
+    """
+    
+    def write_cstring(string):
+        """Encode string as null-terminated UTF-8"""
+        if isinstance(string, str):
+            return string.encode('utf-8', errors='replace') + b'\x00'
+        return str(string).encode('utf-8', errors='replace') + b'\x00'
+    
+    def encode_value(key, value):
+        """Encode a key-value pair"""
+        result = b''
+        
+        if isinstance(value, dict):
+            # Subsection
+            result += b'\x00'  # Subsection type
+            result += write_cstring(key)
+            for sub_key, sub_value in value.items():
+                result += encode_value(sub_key, sub_value)
+            result += b'\x08'  # End of subsection
+        
+        elif isinstance(value, str):
+            # String
+            result += b'\x01'  # String type
+            result += write_cstring(key)
+            result += write_cstring(value)
+        
+        elif isinstance(value, int):
+            # Determine if int32 or int64 based on value range
+            if -2147483648 <= value <= 4294967295:  # Int32 range
+                result += b'\x02'  # Int32 type
+                result += write_cstring(key)
+                result += struct.pack('<I', value & 0xFFFFFFFF)
+            else:  # Int64
+                result += b'\x07'  # Int64 type
+                result += write_cstring(key)
+                result += struct.pack('<Q', value & 0xFFFFFFFFFFFFFFFF)
+        
+        elif isinstance(value, float):
+            # Float32
+            result += b'\x03'  # Float32 type
+            result += write_cstring(key)
+            result += struct.pack('<f', value)
+        
+        else:
+            # Convert to string as fallback
+            result += b'\x01'  # String type
+            result += write_cstring(key)
+            result += write_cstring(str(value))
+        
+        return result
+    
+    # Build the binary data
+    binary_data = b''
+    
+    # Encode all root-level key-value pairs
+    for key, value in data.items():
+        binary_data += encode_value(key, value)
+    
+    # Add final end marker
+    binary_data += b'\x08'
+    
+    # Write to file
+    with open(file_path, 'wb') as f:
+        f.write(binary_data)
