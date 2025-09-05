@@ -1,8 +1,8 @@
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
-import requests 
 from steamclient import STEAM_PATH
+import requests 
 
 BASE_URL:str = "https://steamcdn-a.akamaihd.net"
 
