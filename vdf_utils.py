@@ -1,6 +1,7 @@
+from pathlib import Path
 import struct
 
-def parse_vdf(file_path):
+def parse_vdf(file_path:Path)->dict:
     """
     Parse a binary VDF file and return a dictionary.
     
@@ -98,7 +99,7 @@ def parse_vdf(file_path):
 
 
 
-def write_binary_vdf(data, file_path):
+def write_binary_vdf(data:dict, path:Path):
     """
     Encode a dictionary to binary VDF format and write to file.
     
@@ -167,5 +168,5 @@ def write_binary_vdf(data, file_path):
     binary_data += b'\x08'
     
     # Write to file
-    with open(file_path, 'wb') as f:
+    with open(path, 'wb') as f:
         f.write(binary_data)
