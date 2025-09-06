@@ -6,7 +6,7 @@ def parse_vdf(file_path:Path)->dict:
     Parse a binary VDF file and return a dictionary.
     
     Args:
-        file_path (str): Path to the binary VDF file
+        file_path (Path): Path to the binary VDF file
         
     Returns:
         dict: Parsed VDF data
@@ -105,7 +105,7 @@ def write_binary_vdf(data:dict, path:Path):
     
     Args:
         data (dict): Dictionary to encode
-        file_path (str): Path where to save the binary VDF file
+        file_path (Path): Path where to save the binary VDF file
     """
     
     def write_cstring(string):
