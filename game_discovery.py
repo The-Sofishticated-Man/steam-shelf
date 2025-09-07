@@ -1,0 +1,62 @@
+from pathlib import Path
+from typing import List, NamedTuple
+from steam_db_utils import SteamDatabase
+from game_validator import GameValidator
+
+class GameCandidate(NamedTuple):
+    steam_id: int
+    name: str
+    exe_path: Path
+    start_dir: Path
+
+class GameDiscoveryService:
+    def __init__(self, steam_db: SteamDatabase, validator: GameValidator):
+        self.steam_db = steam_db
+        self.validator = validator
+    
+    def discover_games_from_directory(self, path: Path) -> List[GameCandidate]:
+        """Discover games from a directory structure."""
+        candidates = []
+        
+        for directory in path.iterdir():
+            try:
+                candidate = self._process_directory(directory)
+                if candidate:
+                    candidates.append(candidate)
+            except Exception as e:
+                print(f"Failed to process directory {directory.name}: {e}")
+                continue
+                
+        return candidates
+    
+    def _process_directory(self, directory: Path) -> GameCandidate:
+        """Process a single directory for game discovery."""
+        name = directory.name
+        
+        # Validate directory
+        if not self.validator.is_valid_directory(directory):
+            return None
+        
+        # Check if it's a known Steam game
+        steam_id = self.steam_db.get_steam_id_from_name(name)
+        if not steam_id:
+            return None
+        
+        # Find executables
+        exe_files = list(directory.rglob("*.exe"))
+        valid_exes = self.validator.filter_executables(exe_files)
+        
+        if not valid_exes:
+            print(f"No valid executables found in {name}")
+            return None
+        
+        # Find main executable
+        main_exe = self.validator.find_main_executable(valid_exes, name)
+        print(f"Likely main exe for {name}: {main_exe}")
+        
+        return GameCandidate(
+            steam_id=steam_id,
+            name=name,
+            exe_path=main_exe.resolve(),
+            start_dir=main_exe.parent
+        )
