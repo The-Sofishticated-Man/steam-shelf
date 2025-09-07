@@ -1,4 +1,4 @@
-from typing import Optional
+import json
 
 class NonSteamGame:
     
@@ -39,5 +39,24 @@ class NonSteamGame:
         self.FlatpakAppID = FlatpakAppID 
         self.tags = tags 
     
+    @classmethod
+    def from_candidate(cls, candidate):
+        """Create a NonSteamGame from a GameCandidate."""
+        return cls(
+            id=candidate.steam_id,
+            name=candidate.name,
+            exe=str(candidate.exe_path),
+            dir=str(candidate.start_dir)
+        )
+    
+    def __str__(self):
+        obj = {
+            "name": self.AppName,
+            "steamID": self.appid,
+            "exe": str(self.Exe),
+            "StartDir": str(self.StartDir),
+        }
+        return json.dumps(obj, indent=4)
+         
     def as_dict(self):
         return self.__dict__
