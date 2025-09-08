@@ -2,37 +2,82 @@ from pathlib import Path
 from io import BytesIO
 from PIL import Image
 from steamclient import STEAM_PATH
-import requests 
+import requests
+from typing import Optional
 
-BASE_URL:str = "https://steamcdn-a.akamaihd.net"
 
-# each image type has a suffix that will be added to the saved file's name
-IMG_TYPES = {
-    "library_600x900_2x.jpg":"p.jpg",
-    "library_hero.jpg":"_hero.jpg",
-    "logo.png":"_logo.png",
-    "capsule_616x353.jpg":".jpg"
+class SteamImageClient:
+    """Client for downloading and saving Steam game images."""
+    
+    BASE_URL = "https://steamcdn-a.akamaihd.net"
+    
+    # Image types and their corresponding file suffixes
+    IMG_TYPES = {
+        "library_600x900_2x.jpg": "p.jpg",
+        "library_hero.jpg": "_hero.jpg", 
+        "logo.png": "_logo.png",
+        "capsule_616x353.jpg": ".jpg"
     }
-
-game_id:int 
-
-def save_images_from_id(user_id:int,game_id:int,non_steam_id:int, img_path:str=None):
-    # get the image via web request to steam's CDN
-    for img_type in IMG_TYPES:
-        request = requests.get(f"{BASE_URL}/steam/apps/{game_id}/{img_type}")
-        if request.status_code == 404:
+    
+    def __init__(self, save_path: Path = None):
+        """Initialize the image client.
+        
+        Args:
+            steam_path: Custom Steam installation path. Uses default if None.
+        """
+        self.save_path = save_path or self._get_default_image_path(user_id)
+    
+    def save_images_from_id(self, game_id: int):
+        """Download and save Steam game images.
+        
+        Args:
+            user_id: Steam user ID
+            game_id: Steam game ID to download images for
+            non_steam_id: Non-Steam game ID for file naming
+            img_path: Custom path to save images. Uses default Steam grid path if None.
+            
+        Raises:
+            Exception: If game ID is not found (404 response)
+        """
+        # make sure directory exists
+        self.save_path.mkdir(parents=True, exist_ok=True)
+        
+        # Download each image type
+        for img_type in self.IMG_TYPES:
+            self._download_and_save_image(game_id, img_type, self.save_path)
+    
+    def _get_default_image_path(self, user_id: int) -> Path:
+        """Get the default Steam grid image path for a user."""
+        return Path(f"{self.steam_path}\\userdata\\{user_id}\\config\\grid")
+    
+    def _download_and_save_image(self, game_id: int, img_type: str, 
+                                non_steam_id: int, save_path: Path) -> None:
+        """Download a single image and save it.
+        
+        Args:
+            game_id: Steam game ID
+            img_type: Type of image to download
+            non_steam_id: Non-Steam game ID for file naming
+            save_path: Directory to save the image
+            
+        Raises:
+            Exception: If game ID is not found (404 response)
+        """
+        # Request image from Steam CDN
+        url = f"{self.BASE_URL}/steam/apps/{game_id}/{img_type}"
+        response = requests.get(url)
+        
+        if response.status_code == 404:
             raise Exception("Game ID was not found")
-        print(f"Got image {img_type} for game id {game_id} ")
-
-        # open image in memory
-        img = Image.open(BytesIO(request.content))
-
-        # create image path in steam folder
-        if not img_path:
-            img_path = Path(f"{STEAM_PATH}\\userdata\\{user_id}\\config\\grid")
-        img_path.mkdir(parents=True, exist_ok=True)
-
-        # save the image as the non-steam ID + its type suffix
-        # eg: library_hero.jpg of the bending of isaac becomes 250900_hero.jpg
-        img.save(img_path / (str(non_steam_id)+IMG_TYPES[img_type]))
-        print(f"saved in {img_path}")
+        
+        response.raise_for_status()  # Raise for other HTTP errors
+        
+        print(f"Got image {img_type} for game id {game_id}")
+        
+        # Open image in memory
+        img = Image.open(BytesIO(response.content))
+        
+        # Generate filename and save
+        filename = f"{game_id}{self.IMG_TYPES[img_type]}"
+        img.save(save_path / filename)
+        print(f"Saved {filename} in {save_path}")
