@@ -1,9 +1,7 @@
 from pathlib import Path
 from io import BytesIO
 from PIL import Image
-from steamclient import STEAM_PATH
 import requests
-from typing import Optional
 
 
 class SteamImageClient:
