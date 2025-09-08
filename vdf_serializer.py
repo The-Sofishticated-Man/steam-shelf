@@ -3,7 +3,7 @@ from NonSteamGame import NonSteamGame
 
 class VDFSerializer:
     @staticmethod
-    def games_to_vdf(games: List[NonSteamGame]) -> Dict:
+    def games_to_vdf_dict(games: List[NonSteamGame]) -> Dict:
         """Convert a list of NonSteamGame objects to VDF format."""
         shortcuts = {}
         for i, game in enumerate(games):
@@ -13,7 +13,7 @@ class VDFSerializer:
         return {"shortcuts": shortcuts}
     
     @staticmethod
-    def games_from_vdf(vdf_data: Dict) -> List[NonSteamGame]:
+    def games_from_vdf_dict(vdf_data: Dict) -> List[NonSteamGame]:
         """Convert VDF data to a list of NonSteamGame objects."""
         games = []
         shortcuts = vdf_data.get("shortcuts", {})

@@ -39,13 +39,13 @@ class NonSteamGameRepository:
                 
     def save_games_as_vdf(self, path: Path):
         """Save games to a VDF file."""
-        vdf_data = self.serializer.games_to_vdf(self.games)
+        vdf_data = self.serializer.games_to_vdf_dict(self.games)
         write_binary_vdf(vdf_data, path)
         
     def load_games_from_vdf(self, path: Path):
         """Load games from an existing VDF file."""
         vdf_data = parse_vdf(path)
-        games = self.serializer.games_from_vdf(vdf_data)
+        games = self.serializer.games_from_vdf_dict(vdf_data)
         for game in games:
             self.add_game(game)
             
