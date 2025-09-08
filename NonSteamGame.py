@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 class NonSteamGame:
     
@@ -57,6 +58,6 @@ class NonSteamGame:
             "StartDir": str(self.StartDir),
         }
         return json.dumps(obj, indent=4)
-         
+     
     def as_dict(self):
         return self.__dict__
