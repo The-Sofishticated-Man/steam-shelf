@@ -21,7 +21,7 @@ class SteamImageClient:
         """Initialize the image client.
         
         Args:
-            steam_path: Custom Steam installation path. Uses default if None.
+            save_path: path where to save game images
         """
         self.save_path = save_path or self._get_default_image_path(user_id)
     
@@ -29,10 +29,7 @@ class SteamImageClient:
         """Download and save Steam game images.
         
         Args:
-            user_id: Steam user ID
             game_id: Steam game ID to download images for
-            non_steam_id: Non-Steam game ID for file naming
-            img_path: Custom path to save images. Uses default Steam grid path if None.
             
         Raises:
             Exception: If game ID is not found (404 response)
@@ -43,10 +40,6 @@ class SteamImageClient:
         # Download each image type
         for img_type in self.IMG_TYPES:
             self._download_and_save_image(game_id, img_type, self.save_path)
-    
-    def _get_default_image_path(self, user_id: int) -> Path:
-        """Get the default Steam grid image path for a user."""
-        return Path(f"{self.steam_path}\\userdata\\{user_id}\\config\\grid")
     
     def _download_and_save_image(self, game_id: int, img_type: str, 
                                 non_steam_id: int, save_path: Path) -> None:
