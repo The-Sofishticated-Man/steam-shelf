@@ -2,9 +2,11 @@ from pathlib import Path
 from typing import List, NamedTuple
 from steam_db_utils import SteamDatabase
 from game_validator import GameValidator
+from shortcut_utils import generate_shortcut_appid
 
 class GameCandidate(NamedTuple):
-    steam_id: int
+    steam_id: int  # Steam app ID for downloading images (always present - required for discovery)
+    shortcut_id: int  # Generated shortcut app ID for file naming
     name: str
     exe_path: Path
     start_dir: Path
@@ -15,6 +17,7 @@ class GameDiscoveryService:
         self.validator = validator
     
     def discover_games_from_directory(self, path: Path) -> List[GameCandidate]:
+        # TODO: handle game names with colons (:)
         """Discover games from a directory structure."""
         candidates = []
         
@@ -54,8 +57,12 @@ class GameDiscoveryService:
         main_exe = self.validator.find_main_executable(valid_exes, name)
         print(f"Likely main exe for {name}: {main_exe}")
         
+        # Generate shortcut app ID using the game name and executable
+        shortcut_id = generate_shortcut_appid(name, str(main_exe))
+        
         return GameCandidate(
             steam_id=steam_id,
+            shortcut_id=shortcut_id,
             name=name,
             exe_path=main_exe.resolve(),
             start_dir=main_exe.parent
