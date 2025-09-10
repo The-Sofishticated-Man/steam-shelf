@@ -40,15 +40,15 @@ class GameDiscoveryService:
         if not self.validator.is_valid_directory(directory):
             return None
         
-        # Check if it's a known Steam game
+        # Check if it's a known Steam game - REQUIRED
         steam_id = self.steam_db.get_steam_id_from_name(name)
         if not steam_id:
             return None
-        
+
         # Find executables
         exe_files = list(directory.rglob("*.exe"))
         valid_exes = self.validator.filter_executables(exe_files)
-        
+
         if not valid_exes:
             print(f"No valid executables found in {name}")
             return None
