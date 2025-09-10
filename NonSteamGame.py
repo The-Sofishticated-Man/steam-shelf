@@ -44,7 +44,7 @@ class NonSteamGame:
     def from_candidate(cls, candidate):
         """Create a NonSteamGame from a GameCandidate."""
         return cls(
-            id=candidate.steam_id,
+            id=candidate.shortcut_id,  # Use shortcut_id for the non-Steam game app ID
             name=candidate.name,
             exe=str(candidate.exe_path),
             dir=str(candidate.start_dir)
