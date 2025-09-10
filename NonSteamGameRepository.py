@@ -85,6 +85,7 @@ class NonSteamGameRepository:
         Raises:
             FileNotFoundError: If VDF file doesn't exist
         """
+        # TODO: handle games already in repo such that they don't get refetched
         vdf_data = parse_vdf(path)
         games = self.serializer.games_from_vdf_dict(vdf_data)
         for game in games:
@@ -110,8 +111,11 @@ class NonSteamGameRepository:
         Raises:
             Exception: If game ID not found on Steam
         """
-        for game in self.games:
-            self.image_client.save_images_from_id(game.appid)
+        # Use candidates to get Steam IDs for image downloading
+        for candidate in self.game_candidates:
+            # All candidates should have Steam IDs since discovery requires them
+            print(f"Downloading images for {candidate.name} (Steam ID: {candidate.steam_id}, Shortcut ID: {candidate.shortcut_id})")
+            self.image_client.save_images_from_id(candidate.steam_id, candidate.shortcut_id)
             
     def __iter__(self):
         """Iterate over games in the repository."""
