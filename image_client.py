@@ -3,6 +3,12 @@ from io import BytesIO
 from PIL import Image
 import requests
 
+# Import STEAM_PATH at module level for tests that need to patch it
+try:
+    from steamclient import STEAM_PATH
+except ImportError:
+    STEAM_PATH = None
+
 
 class SteamImageClient:
     """Client for downloading and saving Steam game images."""
@@ -23,32 +29,35 @@ class SteamImageClient:
         Args:
             save_path: path where to save game images
         """
-        self.save_path = save_path or self._get_default_image_path(user_id)
+        self.save_path = save_path or Path.cwd() / "images"
     
-    def save_images_from_id(self, game_id: int):
+    def save_images_from_id(self, game_id: int, shortcut_id: int = None):
         """Download and save Steam game images.
         
         Args:
             game_id: Steam game ID to download images for
+            shortcut_id: Non-Steam shortcut ID for file naming (defaults to game_id)
             
         Raises:
             Exception: If game ID is not found (404 response)
         """
+        # Use shortcut_id for file naming, fallback to game_id if not provided
+        file_id = shortcut_id if shortcut_id is not None else game_id
+        
         # make sure directory exists
         self.save_path.mkdir(parents=True, exist_ok=True)
         
         # Download each image type
         for img_type in self.IMG_TYPES:
-            self._download_and_save_image(game_id, img_type, self.save_path)
+            self._download_and_save_image(game_id, img_type, file_id, self.save_path)
     
-    def _download_and_save_image(self, game_id: int, img_type: str, 
-                                non_steam_id: int, save_path: Path) -> None:
+    def _download_and_save_image(self, game_id: int, img_type: str, file_id: int, save_path: Path) -> None:
         """Download a single image and save it.
         
         Args:
-            game_id: Steam game ID
+            game_id: Steam game ID for downloading from CDN
             img_type: Type of image to download
-            non_steam_id: Non-Steam game ID for file naming
+            file_id: ID to use for file naming (shortcut app ID)
             save_path: Directory to save the image
             
         Raises:
@@ -57,8 +66,12 @@ class SteamImageClient:
         # Request image from Steam CDN
         url = f"{self.BASE_URL}/steam/apps/{game_id}/{img_type}"
         response = requests.get(url)
+
+        print(f"Requesting {url} - Status code: {response.status_code}")
         
         if response.status_code == 404:
+            raise Exception("Game ID was not found")
+        elif response.status_code == 502:
             raise Exception("Game ID was not found")
         
         response.raise_for_status()  # Raise for other HTTP errors
@@ -68,7 +81,40 @@ class SteamImageClient:
         # Open image in memory
         img = Image.open(BytesIO(response.content))
         
-        # Generate filename and save
-        filename = f"{game_id}{self.IMG_TYPES[img_type]}"
+        # Generate filename and save using file_id for naming
+        filename = f"{file_id}{self.IMG_TYPES[img_type]}"
         img.save(save_path / filename)
         print(f"Saved {filename} in {save_path}")
+
+
+def _get_default_image_path(user_id: int) -> Path:
+    """Get the default Steam grid image path for a user.
+    
+    Args:
+        user_id: Steam user ID
+        
+    Returns:
+        Path to the user's Steam grid directory
+    """
+    steam_path = STEAM_PATH
+    if steam_path is None:
+        # Fallback if STEAM_PATH is not available
+        steam_path = Path.home() / ".steam"
+    return Path(steam_path) / "userdata" / str(user_id) / "config" / "grid"
+
+
+def save_images_from_id(user_id: int, game_id: int, non_steam_id: int, img_path: Path = None):
+    """Standalone function to download and save Steam game images.
+    
+    Args:
+        user_id: Steam user ID for default path calculation
+        game_id: Steam game ID to download images for
+        non_steam_id: Non-Steam game ID for file naming
+        img_path: Optional custom path to save images
+        
+    Raises:
+        Exception: If game ID is not found (404 response)
+    """
+    save_path = img_path or _get_default_image_path(user_id)
+    client = SteamImageClient(save_path)
+    client.save_images_from_id(game_id, non_steam_id)
