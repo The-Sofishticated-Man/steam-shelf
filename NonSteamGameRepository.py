@@ -44,9 +44,9 @@ class NonSteamGameRepository:
             self.validator
         )
         self.steam_path = steam_path
-        self.shortcuts_vdf_path = steam_path /"userdata"/user_id/"config"/"shortcuts.vdf"
+        self.shortcuts_vdf_path = steam_path /"userdata"/str(user_id)/"config"/"shortcuts.vdf"
         self.image_client = steam_image_client or SteamImageClient(
-            save_path= steam_path/"userdata"/user_id/"config"/"grid"
+            save_path= steam_path/"userdata"/str(user_id)/"config"/"grid"
         )
 
         # inital load from vdf file
