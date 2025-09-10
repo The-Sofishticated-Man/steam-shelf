@@ -25,12 +25,13 @@ class NonSteamGameRepository:
     """
     def __init__(self, 
                  user_id: int,
-                 steam_path : Path = STEAM_PATH,
+                 steam_path : Path = Path(STEAM_PATH),
                  discovery_service: GameDiscoveryService = None,
                  serializer: VDFSerializer = None,
                  validator: GameValidator = None,
                  steam_image_client:SteamImageClient = None):
         self.games: list[NonSteamGame] = []
+        self.game_candidates: list = []  # Store original candidates for image downloading
         
         # Use dependency injection or create default services
         self.validator = validator or GameValidator(
@@ -69,6 +70,7 @@ class NonSteamGameRepository:
             FileNotFoundError: If directory doesn't exist
         """
         candidates = self.discovery_service.discover_games_from_directory(path)
+        self.game_candidates.extend(candidates)  # Store candidates for image downloading
         for candidate in candidates:
             game = NonSteamGame.from_candidate(candidate)
             self.add_game(game)
