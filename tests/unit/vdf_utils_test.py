@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import os
 import struct
-from vdf_utils import parse_vdf, write_binary_vdf  
+from core.utils.vdf_utils import parse_vdf, write_binary_vdf  
 
 
 @pytest.fixture

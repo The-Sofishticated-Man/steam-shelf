@@ -1,12 +1,12 @@
 """Integration test to verify the new shortcut app ID generation."""
 import pytest
 import requests
-from game_discovery import GameDiscoveryService, GameCandidate
-from game_validator import GameValidator
-from steam_db_utils import SteamDatabase
-from NonSteamGame import NonSteamGame
-from shortcut_utils import generate_shortcut_appid
-from image_client import SteamImageClient, save_images_from_id
+from core.services.game_discovery import GameDiscoveryService, GameCandidate
+from core.services.game_validator import GameValidator
+from core.services.steam_db_utils import SteamDatabase
+from core.models.non_steam_game import NonSteamGame
+from core.utils.shortcut_utils import generate_shortcut_appid
+from core.services.image_client import SteamImageClient, save_images_from_id
 
 
 def test_game_discovery_generates_shortcut_ids(tmp_path):

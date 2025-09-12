@@ -1,4 +1,4 @@
-from shortcut_utils import generate_shortcut_appid
+from core.utils.shortcut_utils import generate_shortcut_appid
 
 
 def test_generate_shortcut_appid():
