@@ -18,15 +18,8 @@ games_path = Path(sys.argv[1])
 users: list[steamclient.User] = steamclient.get_users()
 main_user = users[0]
 
-SHORTCUTS_VDF_PATH = Path(f"{steamclient.STEAM_PATH}\\userdata\\{main_user.id}\\config\\shortcuts.vdf")
-SHORTCUTS_VDF_SAVING_DIR = Path(Path("H:/CodingNShit/steam/shortcuts.vdf"))
 
 game_repo = NonSteamGameRepository(user_id=main_user.id)
-
-if SHORTCUTS_VDF_PATH.exists():
-    game_repo.load_games_from_vdf(SHORTCUTS_VDF_PATH)
-else:
-    print("No shortcuts.vdf file found, defaulting to empty repo")
 
 game_repo.load_games_from_directory(games_path)
 
