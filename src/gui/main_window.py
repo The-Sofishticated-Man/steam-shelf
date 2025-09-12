@@ -1,8 +1,8 @@
 import tkinter as tk
-from .user_selection import UserSelectionFrame
-from .games_display import GamesDisplayFrame
-from .current_games import CurrentGamesFrame
-from NonSteamGameRepository import NonSteamGameRepository
+from gui.utils.user_selection import UserSelectionFrame
+from gui.widgets.games_display import GamesDisplayFrame
+from gui.widgets.current_games import CurrentGamesFrame
+from core.models.repository import NonSteamGameRepository
 from steamclient import get_users
 
 

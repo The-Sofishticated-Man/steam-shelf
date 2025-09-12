@@ -1,5 +1,5 @@
 from typing import List, Dict
-from NonSteamGame import NonSteamGame
+from core.models.non_steam_game import NonSteamGame
 
 class VDFSerializer:
     @staticmethod

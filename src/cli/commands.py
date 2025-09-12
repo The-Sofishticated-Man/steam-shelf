@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Optional
 
 import steamclient
-from NonSteamGameRepository import NonSteamGameRepository
-from steam_db_utils import SteamDatabase
-from vdf_utils import parse_vdf
+from core.models.repository import NonSteamGameRepository
+from core.services.steam_db_utils import SteamDatabase
+from core.utils.vdf_utils import parse_vdf
 
 
 def kill_steam():

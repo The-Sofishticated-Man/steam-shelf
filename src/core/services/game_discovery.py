@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import List, NamedTuple
-from steam_db_utils import SteamDatabase
-from game_validator import GameValidator
-from shortcut_utils import generate_shortcut_appid
+from core.services.steam_db_utils import SteamDatabase
+from core.services.game_validator import GameValidator
+from core.utils.shortcut_utils import generate_shortcut_appid
 
 class GameCandidate(NamedTuple):
     steam_id: int  # Steam app ID for downloading images (always present - required for discovery)

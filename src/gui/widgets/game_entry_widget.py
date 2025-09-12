@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-from .icon_extractor import IconExtractor
+from gui.utils.icon_extractor import IconExtractor
 
 
 class GameEntryWidget:

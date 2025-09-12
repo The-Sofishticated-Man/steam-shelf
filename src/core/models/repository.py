@@ -1,13 +1,13 @@
 from pathlib import Path
 
 from steamclient import STEAM_PATH
-from image_client import SteamImageClient
-from vdf_utils import write_binary_vdf, parse_vdf
-from NonSteamGame import NonSteamGame
-from game_discovery import GameDiscoveryService
-from game_validator import GameValidator
-from vdf_serializer import VDFSerializer
-from steam_db_utils import SteamDatabase
+from core.services.image_client import SteamImageClient
+from core.utils.vdf_utils import write_binary_vdf, parse_vdf
+from core.models.non_steam_game import NonSteamGame
+from core.services.game_discovery import GameDiscoveryService
+from core.services.game_validator import GameValidator
+from core.utils.vdf_serializer import VDFSerializer
+from core.services.steam_db_utils import SteamDatabase
 
 BLACKLISTED_DIRECTORIES = {"steam"}
 BLACKLISTED_EXECUTABLES = {"uninstall", "setup", "update"}
