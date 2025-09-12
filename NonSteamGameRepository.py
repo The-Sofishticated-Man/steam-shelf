@@ -48,8 +48,10 @@ class NonSteamGameRepository:
         self.image_client = steam_image_client or SteamImageClient(
             save_path= steam_path/"userdata"/str(user_id)/"config"/"grid"
         )
-
-        # inital load from vdf file
+        if self.shortcuts_vdf_path.exists():
+            self.load_games_from_vdf(self.shortcuts_vdf_path)
+        else:
+            print("No shortcuts.vdf file found, defaulting to empty repo")
         
     
     def add_game(self, game: NonSteamGame):
