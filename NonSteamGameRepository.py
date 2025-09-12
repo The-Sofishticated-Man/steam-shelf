@@ -30,6 +30,7 @@ class NonSteamGameRepository:
                  serializer: VDFSerializer = None,
                  validator: GameValidator = None,
                  steam_image_client:SteamImageClient = None):
+        self.user_id = user_id
         self.games: list[NonSteamGame] = []
         self.game_candidates: list = []  # Store original candidates for image downloading
         
