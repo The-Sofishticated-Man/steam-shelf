@@ -153,6 +153,7 @@ def clear_games(args):
     
     # Create empty repository and save
     repo = NonSteamGameRepository(user_id=user.id)
+    repo.games = []
     repo.save_games_as_vdf(shortcuts_path)
     
     print("All non-Steam games removed from Steam.")
