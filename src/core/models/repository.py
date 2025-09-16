@@ -40,10 +40,6 @@ class NonSteamGameRepository:
             BLACKLISTED_EXECUTABLES
         )
         self.serializer = serializer or VDFSerializer()
-        self.discovery_service = discovery_service or GameDiscoveryService(
-            SteamDatabase(), 
-            self.validator
-        )
         self.steam_path = steam_path
         self.shortcuts_vdf_path = steam_path /"userdata"/str(user_id)/"config"/"shortcuts.vdf"
         self.image_client = steam_image_client or SteamImageClient(
@@ -53,6 +49,12 @@ class NonSteamGameRepository:
             self.load_games_from_vdf(self.shortcuts_vdf_path)
         else:
             print("No shortcuts.vdf file found, defaulting to empty repo")
+        games_already_added = {game.AppName for game in self.games}
+        self.discovery_service = discovery_service or GameDiscoveryService(
+            SteamDatabase(), 
+            self.validator,
+            added_games=games_already_added
+        )
         
     
     def add_game(self, game: NonSteamGame):

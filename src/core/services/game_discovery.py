@@ -12,10 +12,11 @@ class GameCandidate(NamedTuple):
     start_dir: Path
     confirmed: bool = False  # Whether this game is a confirmed match in the Steam database
 class GameDiscoveryService:
-    def __init__(self, steam_db: SteamDatabase, validator: GameValidator):
+    def __init__(self, steam_db: SteamDatabase, validator: GameValidator, added_games: set = None):
         self.steam_db = steam_db
         self.validator = validator
-    
+        self.games_already_added = added_games or set()  # Track added games to avoid duplicates
+
     def discover_games_from_directory(self, path: Path) -> List[GameCandidate]:
         """Discover games from a directory structure."""
         candidates = []
@@ -34,6 +35,9 @@ class GameDiscoveryService:
     def _process_directory(self, directory: Path) -> GameCandidate:
         """Process a single directory for game discovery."""
         name = directory.name
+        # Skip if already added
+        if name in self.games_already_added:
+            return None
         
         # Validate directory
         if not self.validator.is_valid_directory(directory):
@@ -52,8 +56,10 @@ class GameDiscoveryService:
             print(f"No valid executables found in {name}")
             return None
         
+        
         # Find main executable
         main_exe = self.validator.find_main_executable(valid_exes, name)
+
         print(f"Likely main exe for {name}: {main_exe}")
         
         # Generate shortcut app ID using the game name and executable
