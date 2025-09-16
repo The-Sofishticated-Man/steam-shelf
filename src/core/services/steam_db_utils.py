@@ -41,5 +41,4 @@ class SteamDatabase:
 if __name__ == "__main__":
     db = SteamDatabase()
     db.sync()
-    print(db.get_steam_id_from_name("Undertale"))  # True if Undertale exists
     db.close()
