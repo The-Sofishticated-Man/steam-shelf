@@ -10,14 +10,13 @@ class GameCandidate(NamedTuple):
     name: str
     exe_path: Path
     start_dir: Path
-
+    confirmed: bool = False  # Whether this game is a confirmed match in the Steam database
 class GameDiscoveryService:
     def __init__(self, steam_db: SteamDatabase, validator: GameValidator):
         self.steam_db = steam_db
         self.validator = validator
     
     def discover_games_from_directory(self, path: Path) -> List[GameCandidate]:
-        # TODO: handle game names with colons (:)
         """Discover games from a directory structure."""
         candidates = []
         
