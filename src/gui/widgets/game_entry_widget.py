@@ -114,8 +114,41 @@ class GameEntryWidget:
     
     def _browse_executable(self):
         """Open file dialog to select executable."""
+        # Determine initial directory from current path
+        current_path = self.path_var.get()
+        initial_dir = None
+        
+        if current_path:
+            import os
+            # If current path exists, use its directory
+            if os.path.exists(current_path):
+                initial_dir = os.path.dirname(current_path)
+            else:
+                # If path doesn't exist, try to extract directory part
+                dir_part = os.path.dirname(current_path)
+                if os.path.exists(dir_part):
+                    initial_dir = dir_part
+        
+        # If no initial directory determined, try to use game name to find folder
+        if not initial_dir:
+            game_name = self.game_data.get('name', '')
+            if game_name and hasattr(self, 'parent'):
+                # This is a heuristic - you may need to adjust based on your game discovery logic
+                import os
+                possible_paths = [
+                    f"H:\\Games\\{game_name}",  # Common game directory structure
+                    f"C:\\Games\\{game_name}",
+                    f"C:\\Program Files\\{game_name}",
+                    f"C:\\Program Files (x86)\\{game_name}"
+                ]
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        initial_dir = path
+                        break
+        
         file_path = filedialog.askopenfilename(
             title="Select Executable",
+            initialdir=initial_dir,
             filetypes=[
                 ("Executable files", "*.exe"),
                 ("Batch files", "*.bat"),
