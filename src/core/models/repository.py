@@ -88,7 +88,6 @@ class NonSteamGameRepository:
         Raises:
             FileNotFoundError: If VDF file doesn't exist
         """
-        # TODO: handle games already in repo such that they don't get refetched
         vdf_data = parse_vdf(path)
         games = self.serializer.games_from_vdf_dict(vdf_data)
         for game in games:
