@@ -25,7 +25,7 @@ class SteamShelfGUI:
     def setup_window(self):
         """Initialize the main window."""
         self.root.title("Steam Shelf - User Selection")
-        self.root.geometry("500x800")
+        self.root.geometry("600x900")
         self.root.configure(bg='#2a2a2a')
     
     def create_user_selection_interface(self):
