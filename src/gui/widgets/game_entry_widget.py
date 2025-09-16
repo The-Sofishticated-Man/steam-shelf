@@ -48,6 +48,9 @@ class GameEntryWidget:
         icon_frame = tk.Frame(header_frame, bg='#404040')
         icon_frame.pack(side='left', padx=(5, 10))
         
+        # Store reference to icon frame for updates
+        self.icon_frame = icon_frame
+        
         # Get and display icon
         self._create_icon(icon_frame)
         
@@ -71,18 +74,34 @@ class GameEntryWidget:
                 icon_label = tk.Label(parent, image=icon, bg='#404040')
                 icon_label.pack()
                 self.icon_image = icon  # Keep reference
+                self.icon_label = icon_label  # Store reference for updates
             else:
                 # Default game icon
                 default_icon = IconExtractor.get_default_icon("game", 16)
                 icon_label = tk.Label(parent, text=default_icon, font=("Arial", 16), 
                                     bg='#404040', fg='white')
                 icon_label.pack()
+                self.icon_label = icon_label  # Store reference for updates
         except:
             # Fallback icon
             fallback_icon = IconExtractor.get_default_icon("fallback", 16)
             icon_label = tk.Label(parent, text=fallback_icon, font=("Arial", 16), 
                                 bg='#404040', fg='white')
             icon_label.pack()
+            self.icon_label = icon_label  # Store reference for updates
+    
+    def _refresh_icon(self):
+        """Refresh the icon based on current executable path."""
+        if hasattr(self, 'icon_label') and hasattr(self, 'icon_frame'):
+            # Clear existing icon
+            for widget in self.icon_frame.winfo_children():
+                widget.destroy()
+            
+            # Update game_data path for icon extraction
+            self.game_data['path'] = self.path_var.get()
+            
+            # Create new icon
+            self._create_icon(self.icon_frame)
     
     def _create_path_section(self, parent):
         """Create the executable path editing section."""
@@ -162,6 +181,10 @@ class GameEntryWidget:
             # Update the game object's exe path
             if 'game_object' in self.game_data:
                 self.game_data['game_object'].Exe = file_path
+            
+            # Refresh the icon with the new executable
+            self._refresh_icon()
+            
             # Notify parent of path change
             if self.on_path_changed:
                 self.on_path_changed(self.index, file_path)
