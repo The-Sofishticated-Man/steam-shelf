@@ -46,12 +46,13 @@ class SteamImageClient:
         """
         self.save_path = save_path or Path.cwd() / "images"
     
-    def save_images_from_id(self, game_id: int, shortcut_id: int = None):
+    def save_images_from_id(self, game_id: int, shortcut_id: int = None, progress_callback=None):
         """Download and save Steam game images.
         
         Args:
             game_id: Steam game ID to download images for
             shortcut_id: Non-Steam shortcut ID for file naming (defaults to game_id)
+            progress_callback: Optional callback for progress updates (message, progress)
             
         Raises:
             Exception: If game ID is not found (404 response)
