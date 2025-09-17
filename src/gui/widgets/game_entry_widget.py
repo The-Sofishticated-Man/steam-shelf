@@ -1,4 +1,5 @@
 import tkinter as tk
+import threading
 from tkinter import filedialog
 from gui.utils.icon_extractor import IconExtractor
 
@@ -67,28 +68,47 @@ class GameEntryWidget:
         return game_frame
     
     def _create_icon(self, parent):
-        """Create the icon display."""
-        try:
-            icon = IconExtractor.get_exe_icon(self.game_data.get('path', ''))
-            if icon:
-                icon_label = tk.Label(parent, image=icon, bg='#404040')
-                icon_label.pack()
-                self.icon_image = icon  # Keep reference
-                self.icon_label = icon_label  # Store reference for updates
-            else:
-                # Default game icon
-                default_icon = IconExtractor.get_default_icon("game", 16)
-                icon_label = tk.Label(parent, text=default_icon, font=("Arial", 16), 
-                                    bg='#404040', fg='white')
-                icon_label.pack()
-                self.icon_label = icon_label  # Store reference for updates
-        except:
-            # Fallback icon
-            fallback_icon = IconExtractor.get_default_icon("fallback", 16)
-            icon_label = tk.Label(parent, text=fallback_icon, font=("Arial", 16), 
-                                bg='#404040', fg='white')
-            icon_label.pack()
-            self.icon_label = icon_label  # Store reference for updates
+        """Create the icon display with asynchronous loading."""
+        # Start with default game icon
+        default_icon = IconExtractor.get_default_icon("game", 16)
+        icon_label = tk.Label(parent, text=default_icon, font=("Arial", 16), 
+                            bg='#404040', fg='white')
+        icon_label.pack()
+        self.icon_label = icon_label  # Store reference for updates
+        
+        # Asynchronously load the real icon
+        exe_path = self.game_data.get('path', '')
+        if exe_path:
+            print(f"Starting async icon loading for: {exe_path}")
+            
+            def on_icon_loaded(icon):
+                print(f"Icon callback called for {exe_path}: {icon is not None}")
+                # This callback runs in a background thread, so we need to schedule UI update
+                if icon and hasattr(self, 'icon_label'):
+                    def update_icon():
+                        try:
+                            # Check if widget still exists
+                            if not hasattr(self, 'icon_label') or not self.icon_label.winfo_exists():
+                                return
+                            
+                            print(f"Updating icon in UI for: {exe_path}")
+                            # Replace the text icon with the image icon
+                            self.icon_label.destroy()
+                            new_icon_label = tk.Label(parent, image=icon, bg='#404040')
+                            new_icon_label.pack()
+                            self.icon_image = icon  # Keep reference to prevent garbage collection
+                            self.icon_label = new_icon_label
+                        except tk.TclError as e:
+                            print(f"Error updating icon UI: {e}")
+                    
+                    # Schedule the UI update on the main thread using the parent widget
+                    try:
+                        parent.after(0, update_icon)
+                    except Exception as e:
+                        print(f"Error scheduling UI update: {e}")
+            
+            # Start async icon extraction
+            IconExtractor.get_exe_icon_async(exe_path, (24, 24), on_icon_loaded)
     
     def _refresh_icon(self):
         """Refresh the icon based on current executable path."""
