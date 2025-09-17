@@ -17,18 +17,28 @@ class GameDiscoveryService:
         self.validator = validator
         self.games_already_added = added_games or set()  # Track added games to avoid duplicates
 
-    def discover_games_from_directory(self, path: Path) -> List[GameCandidate]:
+    def discover_games_from_directory(self, path: Path, progress_callback=None) -> List[GameCandidate]:
         """Discover games from a directory structure."""
         candidates = []
         
-        for directory in path.iterdir():
+        # Get list of directories to process
+        directories = [d for d in path.iterdir() if d.is_dir()]
+        total_dirs = len(directories)
+        
+        for i, directory in enumerate(directories):
             try:
+                if progress_callback:
+                    progress_callback(f"Scanning {directory.name}...", i / total_dirs)
+                
                 candidate = self._process_directory(directory)
                 if candidate:
                     candidates.append(candidate)
             except Exception as e:
                 print(f"Failed to process directory {directory.name}: {e}")
                 continue
+        
+        if progress_callback:
+            progress_callback("Game discovery complete", 1.0)
                 
         return candidates
     
