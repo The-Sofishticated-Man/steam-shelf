@@ -2,6 +2,7 @@ import tkinter as tk
 from gui.utils.user_selection import UserSelectionFrame
 from gui.widgets.games_display import GamesDisplayFrame
 from gui.widgets.current_games import CurrentGamesFrame
+from gui.utils.threading_utils import ThreadManager
 from core.models.repository import NonSteamGameRepository
 from steamclient import get_users
 
@@ -13,6 +14,9 @@ class SteamShelfGUI:
         self.chosen_directory = None
         self.steam_repo = None
         self.users = get_users()
+        
+        # Initialize thread manager
+        self.thread_manager = ThreadManager(self.root)
         
         # UI Components
         self.user_selection = None
@@ -56,7 +60,8 @@ class SteamShelfGUI:
         self.games_display = GamesDisplayFrame(
             self.root, 
             self.steam_repo, 
-            self.on_directory_chosen
+            self.on_directory_chosen,
+            self.thread_manager  # Pass thread manager
         )
 
     def on_directory_chosen(self, directory):
