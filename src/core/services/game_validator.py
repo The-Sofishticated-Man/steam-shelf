@@ -28,12 +28,15 @@ class GameValidator:
         if not valid_exes:
             raise ValueError("No valid executables found")
             
-        # First priority: exact name match
         for exe in valid_exes:
+            # First priority: exact name match
             if exe.stem.lower() == game_name.lower():
                 return exe
+            # Second priority: exact name match (ignoring spaces)
+            elif exe.stem.replace(" ", "").lower() == game_name.replace(" ", "").lower():
+                return exe
         
-        # Second priority: biggest file (likely main executable)
+        # Third priority: biggest file (likely main executable)
         # Use a try-catch to handle any file access issues gracefully
         def safe_get_size(file_path):
             try:
