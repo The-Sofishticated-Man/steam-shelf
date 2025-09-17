@@ -48,9 +48,9 @@ class ProgressDialog:
         parent_width = self.parent.winfo_width()
         parent_height = self.parent.winfo_height()
         
-        # Calculate center position
-        dialog_width = self.dialog.winfo_reqwidth()
-        dialog_height = self.dialog.winfo_reqheight()
+        # Use our desired dimensions instead of required size
+        dialog_width = 500
+        dialog_height = 250
         
         x = parent_x + (parent_width - dialog_width) // 2
         y = parent_y + (parent_height - dialog_height) // 2
