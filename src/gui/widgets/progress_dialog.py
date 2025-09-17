@@ -21,7 +21,7 @@ class ProgressDialog:
         # Create the dialog window
         self.dialog = tk.Toplevel(parent)
         self.dialog.title(title)
-        self.dialog.geometry("400x150")
+        self.dialog.geometry("500x250")  # Make it wider than tall (500 wide x 250 high)
         self.dialog.resizable(False, False)
         self.dialog.configure(bg='#2a2a2a')
         
