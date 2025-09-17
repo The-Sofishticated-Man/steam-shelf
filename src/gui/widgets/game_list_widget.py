@@ -54,6 +54,24 @@ class GameListWidget:
             game_widget.pack(fill=tk.X, pady=5, padx=5)
             self.game_widgets.append(game_widget)
     
+    def add_games_batch(self, games_data, start_index=0):
+        """
+        Add a batch of games to the list without clearing existing ones.
+        
+        Args:
+            games_data (list): List of game dictionaries to add
+            start_index (int): Starting index for game numbering
+        """
+        for i, game_data in enumerate(games_data):
+            game_widget = GameEntryWidget(
+                self.scrollable_frame, 
+                game_data, 
+                start_index + i,  # Use correct index for callbacks
+                self.on_path_changed
+            )
+            game_widget.pack(fill=tk.X, pady=5, padx=5)
+            self.game_widgets.append(game_widget)
+    
     def clear_games(self):
         """Clear all games from the list."""
         for widget in self.game_widgets:
