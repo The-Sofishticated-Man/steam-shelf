@@ -64,8 +64,15 @@ class SteamImageClient:
         self.save_path.mkdir(parents=True, exist_ok=True)
         
         # Download each image type
-        for img_type in self.IMG_TYPES:
+        total_images = len(self.IMG_TYPES)
+        for i, img_type in enumerate(self.IMG_TYPES):
+            if progress_callback:
+                progress_callback(f"Downloading {img_type}...", i / total_images)
+            
             self._download_and_save_image(game_id, img_type, file_id, self.save_path)
+        
+        if progress_callback:
+            progress_callback("Image download complete", 1.0)
     
     def _download_and_save_image(self, game_id: int, img_type: str, file_id: int, save_path: Path) -> None:
         """Download a single image and save it.
