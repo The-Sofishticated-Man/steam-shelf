@@ -65,16 +65,17 @@ class NonSteamGameRepository:
         """
         self.games.append(game)
     
-    def load_games_from_directory(self, path: Path):
+    def load_games_from_directory(self, path: Path, progress_callback=None):
         """Load games by discovering them from a directory structure.
         
         Args:
             path (Path): Directory to scan for games
+            progress_callback: Optional callback for progress updates (message, progress)
             
         Raises:
             FileNotFoundError: If directory doesn't exist
         """
-        candidates = self.discovery_service.discover_games_from_directory(path)
+        candidates = self.discovery_service.discover_games_from_directory(path, progress_callback)
         self.game_candidates.extend(candidates)  # Store candidates for image downloading
         for candidate in candidates:
             game = NonSteamGame.from_candidate(candidate)
@@ -109,17 +110,36 @@ class NonSteamGameRepository:
         vdf_data = self.serializer.games_to_vdf_dict(self.games)
         write_binary_vdf(vdf_data, save_path)
 
-    def save_game_images(self):
+    def save_game_images(self, progress_callback=None):
         """Download and save Steam artwork for all games.
+        
+        Args:
+            progress_callback: Optional callback for progress updates (message, progress)
         
         Raises:
             Exception: If game ID not found on Steam
         """
         # Use candidates to get Steam IDs for image downloading
-        for candidate in self.game_candidates:
+        total_games = len(self.game_candidates)
+        for i, candidate in enumerate(self.game_candidates):
             # All candidates should have Steam IDs since discovery requires them
             print(f"Downloading images for {candidate.name} (Steam ID: {candidate.steam_id}, Shortcut ID: {candidate.shortcut_id})")
-            self.image_client.save_images_from_id(candidate.steam_id, candidate.shortcut_id)
+            
+            # Create per-game progress callback if main callback exists
+            def game_progress_callback(message, sub_progress):
+                if progress_callback:
+                    # Calculate overall progress
+                    overall_progress = (i + sub_progress) / total_games
+                    progress_callback(f"{candidate.name}: {message}", overall_progress)
+            
+            self.image_client.save_images_from_id(
+                candidate.steam_id, 
+                candidate.shortcut_id, 
+                progress_callback=game_progress_callback if progress_callback else None
+            )
+        
+        if progress_callback:
+            progress_callback("All images downloaded", 1.0)
             
     def __iter__(self):
         """Iterate over games in the repository."""
