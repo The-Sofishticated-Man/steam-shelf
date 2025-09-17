@@ -34,4 +34,11 @@ class GameValidator:
                 return exe
         
         # Second priority: biggest file (likely main executable)
-        return max(valid_exes, key=lambda f: f.stat().st_size)
+        # Use a try-catch to handle any file access issues gracefully
+        def safe_get_size(file_path):
+            try:
+                return file_path.stat().st_size
+            except (OSError, PermissionError):
+                return 0  # Return 0 if we can't access the file
+        
+        return max(valid_exes, key=safe_get_size)
