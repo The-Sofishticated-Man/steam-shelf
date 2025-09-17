@@ -39,22 +39,24 @@ class SteamDatabase:
         print("Json data fetched successfully")
 
         print("Loading games into local database...")
-
-        self.conn.executemany(
-            "INSERT OR IGNORE INTO games (id, name, safe_name) VALUES (?, ?, ?)",
-            [(app["appid"], app["name"], safe_name(app["name"])) for app in apps],
-        )
-        self.conn.commit()
+        
+        with self._get_connection() as conn:
+            conn.executemany(
+                "INSERT OR IGNORE INTO games (id, name, safe_name) VALUES (?, ?, ?)",
+                [(app["appid"], app["name"], safe_name(app["name"])) for app in apps],
+            )
+            conn.commit()
         print("Games loaded successfully into db")
     
-    def get_steam_id_from_name(self, name: str) -> bool:
-        cur = self.conn.execute("SELECT id FROM games WHERE safe_name = ?", (name,))
-        row = cur.fetchone()
-        return row[0] if row else None 
+    def get_steam_id_from_name(self, name: str) -> int:
+        with self._get_connection() as conn:
+            cur = conn.execute("SELECT id FROM games WHERE safe_name = ?", (safe_name(name),))
+            row = cur.fetchone()
+            return row[0] if row else None 
     
-
     def close(self):
-        self.conn.close()
+        """Close method for compatibility - connections are auto-closed by context manager."""
+        pass
 
 
 if __name__ == "__main__":
