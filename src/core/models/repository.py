@@ -67,16 +67,17 @@ class NonSteamGameRepository:
         """
         self.games.append(game)
     
-    def load_games_from_directory(self, path: Path):
+    def load_games_from_directory(self, path: Path, progress_callback=None):
         """Load games by discovering them from a directory structure.
         
         Args:
             path (Path): Directory to scan for games
+            progress_callback: Optional callback for progress updates
             
         Raises:
             FileNotFoundError: If directory doesn't exist
         """
-        candidates = self.discovery_service.discover_games_from_directory(path)
+        candidates = self.discovery_service.discover_games_from_directory(path, progress_callback)
         self.game_candidates.extend(candidates)  # Store candidates for image downloading
         for candidate in candidates:
             game = NonSteamGame.from_candidate(candidate)
