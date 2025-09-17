@@ -43,12 +43,12 @@ class ThreadManager:
                 
                 # Schedule success callback on main thread
                 if on_success:
-                    self.root.after(0, lambda: on_success(result))
+                    self.root.after(0, lambda r=result: on_success(r))
                     
             except Exception as e:
                 # Schedule error callback on main thread
                 if on_error:
-                    self.root.after(0, lambda: on_error(e))
+                    self.root.after(0, lambda err=e: on_error(err))
             finally:
                 # Remove thread from active set
                 thread = threading.current_thread()
