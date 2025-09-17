@@ -54,9 +54,10 @@ class GamesDisplayFrame:
             def update_progress(message, progress):
                 if self.progress_dialog:
                     # Schedule UI update on main thread
-                    self.parent.after(0, lambda: self.progress_dialog.update_progress(message, progress))
+                    self.parent.after(0, lambda m=message, p=progress: self.progress_dialog.update_progress(m, p))
             
             # Use the repository's existing method to load games from directory
+            # Now with progress callback support!
             self.steam_repo.load_games_from_directory(Path(directory), update_progress)
             
             # Get the newly discovered games
@@ -227,7 +228,7 @@ class GamesDisplayFrame:
             def progress_update(message, progress):
                 if self.progress_dialog:
                     # Schedule update on main thread
-                    self.parent.after(0, lambda: self.progress_dialog.update_progress(message, progress))
+                    self.parent.after(0, lambda m=message, p=progress: self.progress_dialog.update_progress(m, p))
             
             # Save the updated games to VDF
             self.steam_repo.save_games_as_vdf()
