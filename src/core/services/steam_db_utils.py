@@ -1,6 +1,8 @@
 import requests
 import sqlite3
+import threading
 import re
+from contextlib import contextmanager
 STEAM_APP_URL = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
 
 ILLEGAL_CHARS = r'[<>:"/\\|?*]'
@@ -9,10 +11,27 @@ def safe_name(name: str) -> str:
 
 class SteamDatabase:
     def __init__(self, db_path="steam.db"):
-        self.conn = sqlite3.connect(db_path)
-        self.conn.execute(
-            "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY, name TEXT, safe_name TEXT UNIQUE)"
-        )
+        self.db_path = db_path
+        self._lock = threading.Lock()
+        
+        # Initialize the database schema
+        self._init_database()
+    
+    def _init_database(self):
+        """Initialize the database schema."""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY, name TEXT, safe_name TEXT UNIQUE)"
+            )
+    
+    @contextmanager
+    def _get_connection(self):
+        """Get a database connection with proper cleanup."""
+        conn = sqlite3.connect(self.db_path)
+        try:
+            yield conn
+        finally:
+            conn.close()
 
     def sync(self):
         print("Fetching game data from steam...")
