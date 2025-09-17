@@ -50,10 +50,8 @@ class NonSteamGameRepository:
         else:
             print("No shortcuts.vdf file found, defaulting to empty repo")
         games_already_added = {game.AppName for game in self.games}
-        # Create a shared database instance that will be thread-safe
-        self.steam_db = SteamDatabase()
         self.discovery_service = discovery_service or GameDiscoveryService(
-            self.steam_db, 
+            SteamDatabase(), 
             self.validator,
             added_games=games_already_added
         )
