@@ -109,28 +109,17 @@ class NonSteamGameRepository:
         vdf_data = self.serializer.games_to_vdf_dict(self.games)
         write_binary_vdf(vdf_data, save_path)
 
-    def save_game_images(self, progress_callback=None):
+    def save_game_images(self):
         """Download and save Steam artwork for all games.
-        
-        Args:
-            progress_callback: Optional callback for progress updates (message, progress)
         
         Raises:
             Exception: If game ID not found on Steam
         """
         # Use candidates to get Steam IDs for image downloading
-        total_games = len(self.game_candidates)
-        
-        for i, candidate in enumerate(self.game_candidates):
-            if progress_callback:
-                progress_callback(f"Downloading images for {candidate.name}...", i / total_games)
-            
+        for candidate in self.game_candidates:
             # All candidates should have Steam IDs since discovery requires them
             print(f"Downloading images for {candidate.name} (Steam ID: {candidate.steam_id}, Shortcut ID: {candidate.shortcut_id})")
             self.image_client.save_images_from_id(candidate.steam_id, candidate.shortcut_id)
-        
-        if progress_callback:
-            progress_callback("All images downloaded", 1.0)
             
     def __iter__(self):
         """Iterate over games in the repository."""
