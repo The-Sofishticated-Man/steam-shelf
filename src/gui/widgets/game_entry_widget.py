@@ -27,6 +27,12 @@ class GameEntryWidget:
         self.path_var = tk.StringVar(value=game_data.get('path', ''))
         self.icon_image = None  # Keep reference to prevent garbage collection
         
+        # Loading animation state
+        self.loading_animation = None
+        self.loading_icons = ["⏳", "⌛", "🔄", "⚡"]
+        self.loading_index = 0
+        self.is_loading = False
+        
         # Create the widget
         self.frame = self._create_widget()
     
@@ -69,12 +75,8 @@ class GameEntryWidget:
     
     def _create_icon(self, parent):
         """Create the icon display with asynchronous loading."""
-        # Start with default game icon
-        default_icon = IconExtractor.get_default_icon("game", 16)
-        icon_label = tk.Label(parent, text=default_icon, font=("Arial", 16), 
-                            bg='#404040', fg='white')
-        icon_label.pack()
-        self.icon_label = icon_label  # Store reference for updates
+        # Start with loading indicator
+        self._start_loading_animation(parent)
         
         # Asynchronously load the real icon
         exe_path = self.game_data.get('path', '')
@@ -84,35 +86,94 @@ class GameEntryWidget:
             def on_icon_loaded(icon):
                 print(f"Icon callback called for {exe_path}: {icon is not None}")
                 # This callback runs in a background thread, so we need to schedule UI update
-                if icon and hasattr(self, 'icon_label'):
-                    def update_icon():
-                        try:
-                            # Check if widget still exists
-                            if not hasattr(self, 'icon_label') or not self.icon_label.winfo_exists():
-                                return
-                            
-                            print(f"Updating icon in UI for: {exe_path}")
-                            # Replace the text icon with the image icon
+                def update_icon():
+                    try:
+                        # Stop loading animation
+                        self._stop_loading_animation()
+                        
+                        # Check if widget still exists
+                        if not hasattr(self, 'icon_label') or not self.icon_label.winfo_exists():
+                            return
+                        
+                        if icon:
+                            print(f"Updating with extracted icon for: {exe_path}")
+                            # Replace the loading icon with the extracted image icon
                             self.icon_label.destroy()
                             new_icon_label = tk.Label(parent, image=icon, bg='#404040')
                             new_icon_label.pack()
                             self.icon_image = icon  # Keep reference to prevent garbage collection
                             self.icon_label = new_icon_label
-                        except tk.TclError as e:
-                            print(f"Error updating icon UI: {e}")
-                    
-                    # Schedule the UI update on the main thread using the parent widget
-                    try:
-                        parent.after(0, update_icon)
-                    except Exception as e:
-                        print(f"Error scheduling UI update: {e}")
+                        else:
+                            print(f"Using fallback icon for: {exe_path}")
+                            # Show fallback game icon if extraction failed
+                            fallback_icon = IconExtractor.get_default_icon("game", 16)
+                            self.icon_label.configure(text=fallback_icon, fg='white')
+                    except tk.TclError as e:
+                        print(f"Error updating icon UI: {e}")
+                
+                # Schedule the UI update on the main thread using the parent widget
+                try:
+                    parent.after(0, update_icon)
+                except Exception as e:
+                    print(f"Error scheduling UI update: {e}")
             
             # Start async icon extraction
             IconExtractor.get_exe_icon_async(exe_path, (24, 24), on_icon_loaded)
+        else:
+            # No path available, show fallback immediately
+            self._stop_loading_animation()
+            fallback_icon = IconExtractor.get_default_icon("game", 16)
+            self.icon_label.configure(text=fallback_icon, fg='white')
+    
+    def _start_loading_animation(self, parent):
+        """Start the loading animation."""
+        self.is_loading = True
+        self.loading_index = 0
+        
+        # Create initial loading icon
+        loading_icon = self.loading_icons[self.loading_index]
+        icon_label = tk.Label(parent, text=loading_icon, font=("Arial", 16), 
+                            bg='#404040', fg='orange')
+        icon_label.pack()
+        self.icon_label = icon_label
+        
+        # Start animation loop
+        self._animate_loading()
+    
+    def _animate_loading(self):
+        """Animate the loading icon."""
+        if not self.is_loading or not hasattr(self, 'icon_label'):
+            return
+        
+        try:
+            if self.icon_label.winfo_exists():
+                # Update to next loading icon
+                self.loading_index = (self.loading_index + 1) % len(self.loading_icons)
+                new_icon = self.loading_icons[self.loading_index]
+                self.icon_label.configure(text=new_icon)
+                
+                # Schedule next animation frame
+                self.loading_animation = self.icon_label.after(500, self._animate_loading)
+        except tk.TclError:
+            # Widget was destroyed, stop animation
+            self.is_loading = False
+    
+    def _stop_loading_animation(self):
+        """Stop the loading animation."""
+        self.is_loading = False
+        if hasattr(self, 'loading_animation') and self.loading_animation:
+            try:
+                self.icon_label.after_cancel(self.loading_animation)
+            except:
+                pass
+            self.loading_animation = None
     
     def _refresh_icon(self):
         """Refresh the icon based on current executable path."""
         if hasattr(self, 'icon_label') and hasattr(self, 'icon_frame'):
+            # Stop any current loading animation
+            self._stop_loading_animation()
+            
             # Clear existing icon
             for widget in self.icon_frame.winfo_children():
                 widget.destroy()
@@ -120,7 +181,7 @@ class GameEntryWidget:
             # Update game_data path for icon extraction
             self.game_data['path'] = self.path_var.get()
             
-            # Create new icon
+            # Create new icon with loading animation
             self._create_icon(self.icon_frame)
     
     def _create_path_section(self, parent):
