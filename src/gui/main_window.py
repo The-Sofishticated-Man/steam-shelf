@@ -63,10 +63,19 @@ class SteamShelfGUI:
             self.on_directory_chosen,
             self.thread_manager  # Pass thread manager
         )
+        
+        # Set callback for when games are added
+        self.games_display.set_on_games_added_callback(self.on_games_added)
 
     def on_directory_chosen(self, directory):
         """Handle when a directory is chosen for scanning."""
         self.chosen_directory = directory
+
+    def on_games_added(self):
+        """Handle when games are successfully added to Steam."""
+        # Refresh the current games display to show newly added games
+        if self.current_games:
+            self.current_games.refresh()
 
     def run(self):
         """Start the GUI main loop."""
