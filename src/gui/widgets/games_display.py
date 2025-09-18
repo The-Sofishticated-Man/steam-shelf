@@ -16,8 +16,14 @@ class GamesDisplayFrame:
         self.games_display_frame = None
         self.game_list_widget = None
         self.progress_dialog = None
+        self.add_games_button = None
+        self.on_games_added_callback = None
         self.create_directory_button()
     
+    def set_on_games_added_callback(self, callback):
+        """Set callback to be called when games are successfully added."""
+        self.on_games_added_callback = callback
+
     def create_directory_button(self):
         """Create the directory selection button."""
         # Directory selection button
@@ -180,13 +186,13 @@ class GamesDisplayFrame:
     
     def _add_games_button(self):
         """Add the 'Add Selected Games' button after all games are loaded."""
-        add_button = tk.Button(self.games_display_frame, text="Add Selected Games to Steam",
+        self.add_games_button = tk.Button(self.games_display_frame, text="Add Selected Games to Steam",
                               command=self.add_selected_games,
                               font=("Arial", 11, "bold"),
                               bg='#0078d4', fg='white',
                               activebackground='#106ebe', activeforeground='white',
                               relief='flat', bd=0, pady=10)
-        add_button.pack(pady=15)
+        self.add_games_button.pack(pady=15)
 
     def show_found_games(self, directory):
         """Legacy method - use show_found_games_progressive instead."""
@@ -244,6 +250,15 @@ class GamesDisplayFrame:
             if self.progress_dialog:
                 self.progress_dialog.close()
                 self.progress_dialog = None
+            
+            # Hide the add games button since games have been added
+            if self.add_games_button:
+                self.add_games_button.destroy()
+                self.add_games_button = None
+            
+            # Notify parent window that games were added
+            if self.on_games_added_callback:
+                self.on_games_added_callback()
             
             game_names = [game['name'] for game in selected_games]
             messagebox.showinfo("Success", 
