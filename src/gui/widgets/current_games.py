@@ -5,31 +5,41 @@ class CurrentGamesFrame:
     def __init__(self, parent, steam_repo):
         self.parent = parent
         self.steam_repo = steam_repo
-        self.frame = None
+        self.games_container = None
+        self.user_label = None
         self.create_interface()
     
     def create_interface(self):
         """Create the current games display interface."""
         # Main interface label
-        main_label = tk.Label(self.parent, text=f"Selected User: {self.steam_repo.user_id}", 
+        self.user_label = tk.Label(self.parent, text=f"Selected User: {self.steam_repo.user_id}", 
                              font=("Arial", 12, "bold"),
                              bg='#2a2a2a', fg='white')
-        main_label.pack(pady=10)
+        self.user_label.pack(pady=10)
 
         # Create a frame for the games list with scrollbar
-        games_container = tk.Frame(self.parent, bg='#2a2a2a')
-        games_container.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+        self.games_container = tk.Frame(self.parent, bg='#2a2a2a')
+        self.games_container.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+        
+        # Display the games
+        self._display_games()
+    
+    def _display_games(self):
+        """Display the current games in the container."""
+        # Clear existing content
+        for widget in self.games_container.winfo_children():
+            widget.destroy()
         
         # Add a title for the games section
         if self.steam_repo.games:
-            games_title = tk.Label(games_container, text="Current Non-Steam Games:", 
+            games_title = tk.Label(self.games_container, text="Current Non-Steam Games:", 
                                   font=("Arial", 11, "bold"),
                                   bg='#2a2a2a', fg='lightgray')
             games_title.pack(pady=(0, 10))
             
             # Create canvas and scrollbar for scrollable content
-            canvas = tk.Canvas(games_container, bg='#2a2a2a', highlightthickness=0)
-            scrollbar = tk.Scrollbar(games_container, orient="vertical", command=canvas.yview)
+            canvas = tk.Canvas(self.games_container, bg='#2a2a2a', highlightthickness=0)
+            scrollbar = tk.Scrollbar(self.games_container, orient="vertical", command=canvas.yview)
             scrollable_frame = tk.Frame(canvas, bg='#2a2a2a')
             
             # Configure scrolling
@@ -66,7 +76,11 @@ class CurrentGamesFrame:
             canvas.bind_all("<MouseWheel>", _on_mousewheel)
             
         else:
-            no_games_label = tk.Label(games_container, text="No non-Steam games found.",
+            no_games_label = tk.Label(self.games_container, text="No non-Steam games found.",
                                      font=("Arial", 10),
                                      bg='#2a2a2a', fg='gray')
             no_games_label.pack(pady=10)
+    
+    def refresh(self):
+        """Refresh the games display to show updated games list."""
+        self._display_games()
