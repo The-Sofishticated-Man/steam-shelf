@@ -20,6 +20,11 @@ class VDFSerializer:
         
         for shortcut_key in shortcuts:
             shortcut_data = shortcuts[shortcut_key]
+            
+            # Skip malformed entries that aren't dictionaries
+            if not isinstance(shortcut_data, dict):
+                continue
+                
             game = NonSteamGame(
                 id=shortcut_data.get("appid", 0),
                 name=shortcut_data.get("AppName", ""),
