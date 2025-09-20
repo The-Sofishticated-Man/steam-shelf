@@ -3,10 +3,15 @@
 
 import sys
 import subprocess
+import os
 from pathlib import Path
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+# Handle both development and PyInstaller environments
+if not getattr(sys, 'frozen', False):
+    # Running in development - add src to path
+    src_path = Path(__file__).parent.parent / "src"
+    sys.path.insert(0, str(src_path))
 
 from gui.main_window import SteamShelfGUI
 
