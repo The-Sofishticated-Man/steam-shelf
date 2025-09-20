@@ -3,3 +3,6 @@ __pycache__/
 .vscode/
 venv/
 steam.db
+build/
+dist/
+*.spec
