@@ -33,12 +33,28 @@ class SteamDatabase:
         finally:
             conn.close()
 
-    def sync(self):
-        print("Fetching game data from steam...")
+    def sync(self, progress_callback=None):
+        """Synchronize local database with Steam's game list.
+        
+        Args:
+            progress_callback: Optional callback function that takes (progress_percent, status_message)
+        """
+        if progress_callback:
+            progress_callback(10, "Fetching game data from Steam...")
+        else:
+            print("Fetching game data from steam...")
+            
         apps = requests.get(STEAM_APP_URL).json()["applist"]["apps"]
-        print("Json data fetched successfully")
+        
+        if progress_callback:
+            progress_callback(50, "Game data fetched successfully")
+        else:
+            print("Json data fetched successfully")
 
-        print("Loading games into local database...")
+        if progress_callback:
+            progress_callback(60, "Loading games into local database...")
+        else:
+            print("Loading games into local database...")
         
         with self._get_connection() as conn:
             conn.executemany(
@@ -46,7 +62,11 @@ class SteamDatabase:
                 [(app["appid"], app["name"], safe_name(app["name"])) for app in apps],
             )
             conn.commit()
-        print("Games loaded successfully into db")
+            
+        if progress_callback:
+            progress_callback(100, "Games loaded successfully into database")
+        else:
+            print("Games loaded successfully into db")
     
     def get_steam_id_from_name(self, name: str) -> int:
         with self._get_connection() as conn:
