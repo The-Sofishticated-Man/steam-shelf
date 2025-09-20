@@ -31,6 +31,12 @@ class SteamShelfGUI:
         self.root.title("Steam Shelf - User Selection")
         self.root.geometry("600x900")
         self.root.configure(bg='#2a2a2a')
+        
+        # Set custom icon - just put icon.ico in your project root
+        try:
+            self.root.iconbitmap("icon.ico")
+        except:
+            pass  # Use default icon if file not found
     
     def create_user_selection_interface(self):
         """Create the user selection interface."""
