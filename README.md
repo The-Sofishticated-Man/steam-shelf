@@ -6,7 +6,7 @@
 
 Steam Shelf is a tool that automates the process of adding collections of ~~legally obtained~~ games to your Steam library as non-steam games. Simply point it to your games directory, and it will add them all, automatically fetching and applying the official Steam artworks.
 
-<p align="center">
+<p align="left">
 <img src="docs/media/Screenshot 2025-09-23 131156.png" alt="screenshot" width="200">
 </p>
 
