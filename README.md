@@ -1,114 +1,94 @@
+<p align="center">
+<img src="docs/media/steamshelf2.png" alt="logo" width="200">
+</p>
+
 # Steam Shelf
 
-Add and organize legally-owned non-Steam games in your Steam library, complete with custom artwork and metadata. Keep your collection fully integrated into Steam.
+Steam Shelf is a tool that automates the process of adding collections of ~~legally obtained~~ games to your Steam library as non-steam games. Simply point it to your games directory, and it will add them all, automatically fetching and applying the official Steam artworks.
 
-## 🚀 Quick Start
 
-### GUI Version (Recommended)
+## ✨Features
 
-```bash
-python scripts/steam-shelf-gui.py
+- Batch Import: Scans a directory and adds all discovered games to Steam in one click.
+- Automatic Artwork Curation: Automatically fetches high-quality official artwork (Portrait, Hero, Logo, and Capsule) for each game.
+- Smart Game Matching: Uses folder names to intelligently find the correct corresponding Steam game for accurate artwork matching.
+
+- Dual Interface: Choose between a GUI or a CLI tool.
+
+- Standalone Executable: No installation required; just download and run the .exe.
+
+
+## 🚀Usage
+### **Important:** Folder Naming Convetion 
+For Steam Shelf to correctly identify your games and fetch the right data, **the game's folder name must closely match its name on Steam.**
+
+**The Rule**: Your directory name must be **EXACTLY IDENTICAL** to the game's name on Steam, with one exception: you must remove any characters that are not allowed in Windows folder names.
+
+
+**Invalid Windows Folder Characters:** `\ / : * ? " < > |`
+#### Examples:
+| Game Title on Steam | Correct Folder Name|
+| :--- | :--- | 
+| `Half-Life 2: Episode One` | `Half-Life 2 Episode One` |
+| `Amazing Frog?` | `Amazing Frog` |
+| `Emily is Away <3` | `Emily is Away 3` |
+| `Chair F*cking Simulator` | `Chair Fcking Simulator` |  ( ͠° ͟ʖ ͡°)
+
+### GUI
+Just download and run steam shelf from the [releases](https://github.com/the-sofishticated-man/steam-shelf/releases)
+
+### CLI (From Source)
+start by cloning this repo:
 ```
-
-### CLI Version
-
-```bash
-python scripts/steam-shelf.py /path/to/games/directory
+git clone https://github.com/the-sofishticated-man/steam-shelf
+cd steam-shelf
 ```
-
-## 📁 Project Structure
-
-The project has been restructured for better maintainability and development:
-
+install all the dependancies:
 ```
-steam-shelf/
-├── src/                          # 🏗️ Main source code
-│   ├── core/                     # 🧠 Core business logic (UI-independent)
-│   │   ├── models/              # 📊 Data models
-│   │   │   ├── non_steam_game.py       # Game data structure
-│   │   │   └── repository.py           # Game repository management
-│   │   ├── services/            # ⚙️ Business services
-│   │   │   ├── game_discovery.py       # Game discovery logic
-│   │   │   ├── game_validator.py       # Game validation
-│   │   │   ├── image_client.py         # Steam image handling
-│   │   │   └── steam_db_utils.py       # Steam database utilities
-│   │   └── utils/               # 🔧 Utility modules
-│   │       ├── shortcut_utils.py       # Steam shortcut utilities
-│   │       ├── vdf_serializer.py       # VDF serialization
-│   │       └── vdf_utils.py            # VDF parsing utilities
-│   ├── cli/                     # 💻 Command-line interface
-│   │   └── commands.py          # CLI commands and logic
-│   └── gui/                     # 🖼️ Graphical user interface
-│       ├── main_window.py       # Main GUI application
-│       ├── widgets/             # GUI components
-│       └── utils/               # GUI-specific utilities
-├── scripts/                     # 🚀 Entry points
-│   ├── steam-shelf.py          # CLI entry point
-│   ├── steam-shelf-gui.py      # GUI entry point
-│   └── steam-shelf.bat         # Windows batch file
-├── tests/                       # 🧪 Test files
-│   ├── unit/                   # Unit tests
-│   ├── integration/            # Integration tests
-│   └── fixtures/              # Test data
-├── docs/                       # 📚 Documentation
-├── config/                     # ⚙️ Configuration files
-├── requirements.txt            # 📦 Dependencies
-└── LICENSE
-```
-
-## 🏗️ Architecture Benefits
-
-### ✅ **Better Organization**
-
-- **Separation of Concerns**: Core logic is independent of UI
-- **Modular Design**: Easy to add new features or interfaces
-- **Clear Dependencies**: Reduced coupling between components
-
-### ✅ **Improved Development**
-
-- **Scalable**: Add new features without cluttering
-- **Testable**: Well-organized test structure
-- **Maintainable**: Clear boundaries between different concerns
-- **Professional**: Follows Python packaging best practices
-
-### ✅ **Reusability**
-
-- Core logic can be imported by both CLI and GUI
-- Easy to create new interfaces (web, API, etc.)
-- Clean separation allows for better testing
-
-## 🔧 Development
-
-### Installation
-
-```bash
 pip install -r requirements.txt
 ```
-
-### Running Tests
-
-```bash
-# Run all tests
-pytest
-
-# Run only unit tests
-pytest tests/unit/
-
-# Run only integration tests
-pytest tests/integration/
+sync the database:
 ```
+./scripts/steam-shelf.bat sync-db
+```
+then run the CLI script:
+```
+./scripts/steam-shelf.bat discover /path/to/your/game/directory
+```
+or:
+```
+python ./scripts/steam-shelf.py
+```
+**Note**: the CLI tool currently does not have support for changing a game's default path, so essentially you're stuck with what it *guesses* the executable is.
 
-### Development Guidelines
+## 🤝 Contributing
+Contributions are welcome. If you want to improve Steam Shelf, here's how to get started.
 
-- Core business logic goes in `src/core/`
-- UI-specific code goes in `src/cli/` or `src/gui/`
-- All tests should be in `tests/` with appropriate subdirectories
-- Use relative imports within the src package
+    1. Fork the repo
+    2. Create a feature branch (`git checkout -b feature/your-feature`)
+    3. Commit your changes (`git commit -m 'Add your feature'`)
+    4. Push to the branch (`git push origin feature/your-feature`)
+    5. Open a Pull Request
 
-## 📋 Legacy Files
 
-The following files remain in the root for compatibility but will be removed in future versions:
+## Roadmap
+Probably gonna add some more features in the future.
 
-- `main.py` → Use `scripts/steam-shelf.py`
-- `gui.py` → Use `scripts/steam-shelf-gui.py`
-- `cli.py` → Moved to `src/cli/commands.py`
+- [ ]  More metadata support (description, tags).
+- [ ]  Icon fetching support.
+- [ ]  Better UI (I have 0 artistic sense, sorry not sorry).
+- [ ]  Functionality for changing executable paths in the CLI.
+- [ ]  Cross-Platform support (Linux, MacOS).
+
+
+
+
+## 📃License
+
+This project is licensed under the [MIT License](https://choosealicense.com/licenses/mit/)
+
+
+## ⚠️Disclaimer
+Steam Shelf is not affiliated with Valve or Steam, PLEASE DON'T SUE ME.
+
+Oh yea should probably also mention this is for **educational purposes only**.
