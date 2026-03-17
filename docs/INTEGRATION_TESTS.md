@@ -28,50 +28,63 @@ python -m pytest -m integration -v
 python -m pytest -m "not integration"
 ```
 
+## Integration Test Modules
+
+- `tests/integration/test_steam_api_integration.py`
+- `tests/integration/test_discovery_integration.py`
+- `tests/integration/test_image_client_integration.py`
+- `tests/integration/test_end_to_end_integration.py`
+
 ## Integration Test Coverage
 
 The integration tests cover:
 
-### 1. **Steam API Endpoint Verification** (`test_steam_api_endpoint_real`)
+### 1. **Steam App List Endpoint Verification** (`test_steam_app_list_endpoint_returns_game_titles`)
+
+- Tests Steam's app list endpoint (`ISteamApps/GetAppList/v2`)
+- Verifies game records include app IDs and names
+- Validates known game titles are present
+
+### 2. **Steam CDN Endpoint Verification** (`test_steam_api_endpoint_real`)
 
 - Tests actual Steam CDN endpoints with a known game (Counter-Strike 2, ID: 730)
 - Verifies all image types: library_600x900_2x.jpg, library_hero.jpg, logo.png, capsule_616x353.jpg
 - Checks HTTP response codes and content types
 - Ensures images are actually downloadable from Steam's servers
 
-### 2. **Error Handling** (`test_steam_api_404_handling`)
+### 3. **Error Handling** (`test_steam_api_404_handling`)
 
 - Tests Steam API behavior with non-existent game IDs
 - Verifies proper error status codes (404 or 502)
 - Ensures the system handles Steam API errors gracefully
 
-### 3. **Real Image Download and File Storage** (`test_image_client_real_download_and_file_storage`)
+### 4. **Real Image Download and File Storage** (`test_image_client_real_download_and_file_storage`)
 
 - Downloads actual images from Steam CDN
 - Verifies files are saved with correct shortcut ID naming scheme
 - Checks file integrity (non-empty, valid image headers)
 - Tests JPEG and PNG format validation
 
-### 4. **Standalone Function Testing** (`test_standalone_function_real_download`)
+### 5. **Standalone Function Testing** (`test_standalone_function_real_download`)
 
 - Tests the `save_images_from_id()` standalone function
 - Verifies backward compatibility with existing API
 - Uses generated shortcut IDs for file naming
 
-### 5. **Directory Creation and Permissions** (`test_directory_creation_and_permissions`)
+### 6. **Directory Creation and Permissions** (`test_directory_creation_and_permissions`)
 
 - Tests automatic directory structure creation
 - Verifies nested path handling (userdata/123456/config/grid)
 - Checks file permissions and read/write access
 - Ensures proper Steam directory structure
 
-### 6. **Error Handling with Invalid Games** (`test_error_handling_with_invalid_game_id`)
+### 7. **Error Handling with Invalid Games** (`test_error_handling_with_invalid_game_id`)
 
 - Tests exception handling for non-existent game IDs
 - Verifies no partial files are created on errors
 - Ensures clean failure without side effects
 
-### 7. **End-to-End Workflow** (`test_end_to_end_workflow_with_real_data`)
+### 8. **End-to-End Workflow** (`test_end_to_end_workflow_with_real_data`)
 
 - Complete integration test with real Steam database
 - Tests game discovery → shortcut generation → image downloading workflow
