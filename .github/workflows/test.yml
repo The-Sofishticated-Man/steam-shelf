@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.13 # Updated version
+      uses: actions/setup-python@v5 # Updated Action
+      with:
+        python-version: "3.13"
+        cache: 'pip' # Speeds up your workflow significantly
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        # Install the project and its requirements
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # Optional: pip install -e . (if you have a pyproject.toml)
+
+    - name: Lint with flake8
+      run: |
+        # High-priority errors (E9, F63, F7, F82) will fail the build
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Style warnings (max-complexity 10) won't fail the build due to --exit-zero
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Test with pytest
+      run: |
+        pytest
