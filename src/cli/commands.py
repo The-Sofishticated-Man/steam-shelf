@@ -6,12 +6,36 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
-import steamclient
 from core.models.repository import NonSteamGameRepository
 from core.services.steam_db_utils import SteamDatabase
 from core.utils.vdf_utils import parse_vdf
+
+
+def _require_steamclient() -> Any:
+    """Import steamclient lazily so non-Steam commands still work."""
+    try:
+        import steamclient as _steamclient
+    except (ImportError, FileNotFoundError, OSError) as exc:
+        print(
+            "Error: Steam is not installed or not discoverable on this machine. "
+            "This command requires Steam."
+        )
+        raise SystemExit(1) from exc
+    return _steamclient
+
+
+def _get_shortcuts_path(user_id: int) -> Path:
+    """Build the shortcuts.vdf path for a Steam user."""
+    from core.utils.steam_path import get_steam_path
+
+    steam_path = get_steam_path()
+    if steam_path is None:
+        print("Error: Could not resolve Steam installation path.")
+        raise SystemExit(1)
+
+    return steam_path / "userdata" / str(user_id) / "config" / "shortcuts.vdf"
 
 
 def kill_steam():
@@ -24,8 +48,9 @@ def kill_steam():
         print(f"Warning: Could not kill Steam process: {e}")
 
 
-def get_main_user() -> steamclient.User:
+def get_main_user() -> Any:
     """Get the primary Steam user."""
+    steamclient = _require_steamclient()
     users = steamclient.get_users()
     if not users:
         print("Error: No Steam users found.")
@@ -49,7 +74,7 @@ def discover_games(args):
     repo = NonSteamGameRepository(user_id=user.id)
     
     # Load existing shortcuts if they exist
-    shortcuts_path = Path(f"{steamclient.STEAM_PATH}\\userdata\\{user.id}\\config\\shortcuts.vdf")
+    shortcuts_path = _get_shortcuts_path(user.id)
     if shortcuts_path.exists() and not args.fresh:
         print("Loading existing shortcuts...")
         repo.load_games_from_vdf(shortcuts_path)
@@ -101,7 +126,7 @@ def discover_games(args):
 def list_games(args):
     """List games currently in Steam shortcuts."""
     user = get_main_user()
-    shortcuts_path = Path(f"{steamclient.STEAM_PATH}\\userdata\\{user.id}\\config\\shortcuts.vdf")
+    shortcuts_path = _get_shortcuts_path(user.id)
     
     if not shortcuts_path.exists():
         print("No shortcuts.vdf file found. No non-Steam games installed.")
@@ -135,7 +160,7 @@ def sync_database(args):
 def clear_games(args):
     """Clear all non-Steam games from shortcuts."""
     user = get_main_user()
-    shortcuts_path = Path(f"{steamclient.STEAM_PATH}\\userdata\\{user.id}\\config\\shortcuts.vdf")
+    shortcuts_path = _get_shortcuts_path(user.id)
     
     if not shortcuts_path.exists():
         print("No shortcuts.vdf file found.")
@@ -166,7 +191,7 @@ def read_vdf(args):
     # Special case: if user specifies "shortcuts", find their shortcuts.vdf
     if args.file.lower() == "shortcuts":
         user = get_main_user()
-        vdf_path = Path(f"{steamclient.STEAM_PATH}\\userdata\\{user.id}\\config\\shortcuts.vdf")
+        vdf_path = _get_shortcuts_path(user.id)
         print(f"Reading shortcuts.vdf for user {user.persona_name}: {vdf_path}")
     
     if not vdf_path.exists():

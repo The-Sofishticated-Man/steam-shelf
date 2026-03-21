@@ -2,12 +2,7 @@ from pathlib import Path
 from io import BytesIO
 from PIL import Image
 import requests
-
-# Import STEAM_PATH at module level for tests that need to patch it
-try:
-    from steamclient import STEAM_PATH
-except ImportError:
-    STEAM_PATH = None
+from core.utils.steam_path import get_steam_path_or_fallback
 
 
 class SteamImageClient:
@@ -171,11 +166,8 @@ def _get_default_image_path(user_id: int) -> Path:
     Returns:
         Path to the user's Steam grid directory
     """
-    steam_path = STEAM_PATH
-    if steam_path is None:
-        # Fallback if STEAM_PATH is not available
-        steam_path = Path.home() / ".steam"
-    return Path(steam_path) / "userdata" / str(user_id) / "config" / "grid"
+    steam_path = get_steam_path_or_fallback()
+    return steam_path / "userdata" / str(user_id) / "config" / "grid"
 
 
 def save_images_from_id(user_id: int, game_id: int, non_steam_id: int, img_path: Path = None):

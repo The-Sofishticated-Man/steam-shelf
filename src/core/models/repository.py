@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from steamclient import STEAM_PATH
 from core.services.image_client import SteamImageClient
 from core.utils.vdf_utils import write_binary_vdf, parse_vdf
 from core.models.non_steam_game import NonSteamGame
 from core.services.game_discovery import GameDiscoveryService
 from core.services.game_validator import GameValidator
+from core.utils.steam_path import get_steam_path_or_fallback
 from core.utils.vdf_serializer import VDFSerializer
 from core.services.steam_db_utils import SteamDatabase
 
@@ -25,9 +25,9 @@ class NonSteamGameRepository:
     """
     def __init__(self, 
                  user_id: int,
-                 steam_path : Path = Path(STEAM_PATH),
+                 steam_path : Path | None = None,
                  discovery_service: GameDiscoveryService = None,
-                 serializer: VDFSerializer = None,
+                 serializer: VDFSerializer = None ,
                  validator: GameValidator = None,
                  steam_image_client:SteamImageClient = None):
         self.user_id = user_id
@@ -40,6 +40,7 @@ class NonSteamGameRepository:
             BLACKLISTED_EXECUTABLES
         )
         self.serializer = serializer or VDFSerializer()
+        steam_path = steam_path or get_steam_path_or_fallback()
         self.steam_path = steam_path
         self.shortcuts_vdf_path = steam_path /"userdata"/str(user_id)/"config"/"shortcuts.vdf"
         self.image_client = steam_image_client or SteamImageClient(
@@ -146,7 +147,7 @@ class NonSteamGameRepository:
         for game in self.games:
             yield game
 if __name__ == "__main__":
-    stuff = NonSteamGameRepository()
+    stuff = NonSteamGameRepository(user_id=0)
     stuff.load_games_from_directory(Path(r"H:\Games"))
     for game in stuff:
         print(game)
